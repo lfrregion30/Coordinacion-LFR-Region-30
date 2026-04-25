@@ -31,34 +31,38 @@
 
         .btn-email { color: #17458f; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 5px; }
         .btn-email:hover { text-decoration: underline; }
-        .flag-icon { margin-right: 5px; border-radius: 2px; }
-		
-		/* Forzamos a que la columna de nombres sea más ancha */
-#tablaCadre th:first-child, 
-#tablaCadre td:first-child {
-    min-width: 250px; /* Ajusta este número si los nombres son muy largos */
-    white-space: nowrap; /* Evita que el nombre salte de línea */
-}
+        
+        /* Ajuste de Banderas */
+        .flag-icon { 
+            margin-right: 10px; 
+            border-radius: 2px; 
+            vertical-align: middle;
+            transform: scale(1.1);
+        }
 
-/* Ajuste para que las celdas de contacto no se peguen */
-#tablaCadre td {
-    padding: 15px 10px;
-    vertical-align: middle;
-}
-		
-/* Forzamos a que la columna de nombres sea más ancha */
-#tablaCadre th:first-child, 
-#tablaCadre td:first-child {
-    min-width: 250px; /* Ajusta este número si los nombres son muy largos */
-    white-space: nowrap; /* Evita que el nombre salte de línea */
-}
+        /* Forzamos anchos de columnas para evitar saltos de línea */
+        #tablaCadre th:first-child, 
+        #tablaCadre td:first-child {
+            min-width: 280px; 
+            white-space: nowrap; 
+        }
 
-/* Ajuste para que las celdas de contacto no se peguen */
-#tablaCadre td {
-    padding: 15px 10px;
-    vertical-align: middle;
-}		
-		
+        #tablaCadre th:nth-child(2), 
+        #tablaCadre td:nth-child(2) {
+            min-width: 200px;
+            white-space: nowrap;
+        }
+
+        .info-ubicacion {
+            font-size: 0.95em;
+            color: #444;
+            line-height: 1.4;
+        }
+
+        #tablaCadre td {
+            padding: 15px 12px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -104,14 +108,14 @@
                 <thead>
                     <tr>
                         <th>Especialista</th>
-                        <th>País</th>
-                        <th>Distrito</th>
+                        <th>Ubicación (País/Distrito)</th>
                         <th>Áreas de Especialización</th>
+
                         <th>Contacto</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoTabla">
-                    <tr><td colspan="5" style="text-align:center;">Cargando directorio...</td></tr>
+                    <tr><td colspan="4" style="text-align:center;">Cargando directorio...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -137,8 +141,6 @@
             try {
                 const response = await fetch(urlCSV);
                 const data = await response.text();
-                
-                // Función para procesar CSV con comas y comillas correctamente
                 const filas = procesarCSV(data);
 
                 especialistasGlobal = filas.slice(1).map(col => {
@@ -149,7 +151,7 @@
                             pais: col[2],
                             correo: col[3],
                             distrito: col[4],
-                            area: col[5] // Aquí viene el texto con los ";"
+                            area: col[5]
                         };
                     }
                     return null;
@@ -157,11 +159,10 @@
 
                 renderizarTabla(especialistasGlobal);
             } catch (error) {
-                document.getElementById('cuerpoTabla').innerHTML = '<tr><td colspan="5">Error al cargar datos.</td></tr>';
+                document.getElementById('cuerpoTabla').innerHTML = '<tr><td colspan="4">Error al cargar datos.</td></tr>';
             }
         }
 
-        // Algoritmo para leer CSV evitando errores por comas internas
         function procesarCSV(texto) {
             const filas = [];
             let currFila = [];
@@ -185,19 +186,28 @@
 
         function renderizarTabla(datos) {
             const tbody = document.getElementById('cuerpoTabla');
+            
+            if (datos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No se encontraron resultados.</td></tr>';
+                return;
+            }
+
             tbody.innerHTML = datos.map(e => {
                 const iso = obtenerBandera(e.pais);
-                const banderaHtml = iso ? `<span class="flag-icon flag-icon-${iso}"></span>` : '🌐';
+                const banderaHtml = iso ? `<span class="flag-icon flag-icon-${iso}"></span>` : '🌐 ';
                 
-                // SEPARACIÓN POR PUNTO Y COMA
                 const areas = e.area.split(';').filter(a => a.trim() !== "");
                 const tagsHtml = areas.map(a => `<span class="especialidad-tag">${a.trim()}</span>`).join('');
 
                 return `
                     <tr>
-                        <td><strong>${e.nombre} ${e.apellidos}</strong></td>
-                        <td>${banderaHtml} ${e.pais}</td>
-                        <td>Distrito ${e.distrito}</td>
+                        <td>${banderaHtml} <strong>${e.nombre} ${e.apellidos}</strong></td>
+                        <td>
+                            <div class="info-ubicacion">
+                                <strong>${e.pais}</strong><br>
+                                Distrito ${e.distrito}
+                            </div>
+                        </td>
                         <td><div class="areas-wrapper">${tagsHtml}</div></td>
                         <td><a href="mailto:${e.correo}" class="btn-email">✉️ Contactar</a></td>
                     </tr>
@@ -211,6 +221,7 @@
                 e.nombre.toLowerCase().includes(busqueda) ||
                 e.apellidos.toLowerCase().includes(busqueda) ||
                 e.area.toLowerCase().includes(busqueda) ||
+                e.pais.toLowerCase().includes(busqueda) ||
                 e.distrito.toLowerCase().includes(busqueda)
             );
             renderizarTabla(filtrados);
