@@ -6,6 +6,8 @@
     <title>Metas y Aportaciones - Fundación Rotaria Región 30</title>
     <link rel="stylesheet" href="css/estilos.css">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+    
     <style>
         .ranking-contenedor { margin: 40px 0; }
         
@@ -87,6 +89,13 @@
             font-weight: bold;
             color: #333;
         }
+
+        /* Estilo para las banderas */
+        .flag-icon {
+            margin-right: 8px;
+            border-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
@@ -134,32 +143,50 @@
         </section>
     </main>
 
+    <footer>
+        <div class="contenedor footer-grid">
+            <div class="footer-col">
+                <img src="img/logo-coordinacion.png" alt="Rotary White" class="logo-footer">
+                <p>Coordinación Regional de la Fundación Rotaria, Región 30.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Enlaces Útiles</h4>
+                <ul>
+                    <li><a href="https://brandcenter.rotary.org/es-ES" target="_blank">Brand Center</a></li>
+                    <li><a href="https://www.rotary.org/es/our-causes/ending-polio" target="_blank">PolioPlus</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contacto</h4>
+                <p><strong>Email:</strong> contacto@rotaryregion30.org</p>
+                <p><strong>Ubicación:</strong> Arequipa, Perú</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 La Fundación Rotaria de Rotary International - Región 30.</p>
+        </div>
+    </footer>
+
 <script>
     const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSv-x-CV8zYBCvNNmbc455_SSPoWSp6_gbv9H23ovw0OHFXjxvqJ3l270xclcFR3BeXnIXkaRQCosmE/pub?gid=0&single=true&output=csv';
     let datosDistritos = [];
 
-    // Función optimizada con todos los distritos de la Región 30
+    // Función para asignar bandera usando Flag-Icon-CSS
     function obtenerBandera(nombreDistrito) {
         const d = nombreDistrito.toString().trim();
-        
-        // Chile
-        if (["4320", "4340", "4355"].includes(d)) return "🇨🇱";
-        // Perú
-        if (["4455", "4465"].includes(d)) return "🇵🇪";
-        // Ecuador
-        if (d === "4400") return "🇪🇨";
-        // Bolivia
-        if (d === "4690") return "🇧🇴";
-        // Argentina y Paraguay
-        if (d === "4845") return "🇦🇷🇵🇾";
-        // Argentina
-        if (["4851", "4895", "4905", "4921"].includes(d)) return "🇦🇷";
-        // Argentina y Uruguay
-        if (d === "4945") return "🇦🇷🇺🇾";
-        // Uruguay
-        if (d === "4975") return "🇺🇾";
-        
-        return "🌐"; // Por si aparece un distrito nuevo o no identificado
+        let iso = "";
+
+        if (["4320", "4340", "4355"].includes(d)) iso = "cl"; // Chile
+        else if (["4455", "4465"].includes(d)) iso = "pe"; // Perú
+        else if (d === "4400") iso = "ec"; // Ecuador
+        else if (d === "4690") iso = "bo"; // Bolivia
+        else if (d === "4845") return '<span class="flag-icon flag-icon-ar"></span><span class="flag-icon flag-icon-py"></span>'; // Argentina/Paraguay
+        else if (["4851", "4895", "4905", "4921"].includes(d)) iso = "ar"; // Argentina
+        else if (d === "4945") return '<span class="flag-icon flag-icon-ar"></span><span class="flag-icon flag-icon-uy"></span>'; // Argentina/Uruguay
+        else if (d === "4975") iso = "uy"; // Uruguay
+        else return "🌐";
+
+        return `<span class="flag-icon flag-icon-${iso}"></span>`;
     }
 
     async function obtenerDatos() {
