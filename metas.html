@@ -98,58 +98,86 @@
         try {
             const response = await fetch(urlCSV);
             const data = await response.text();
-            const filas = data.split('\n').slice(1); 
+            const filas = data.split(/\r?\n/).slice(1); 
             
             let distritosArray = [];
 
             filas.forEach(fila => {
-                // Usamos una expresión regular para separar por comas, 
-                // pero ignorando las comas que estén dentro de comillas (por si acaso)
-                const columnas = fila.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                
-                if (columnas.length >= 7) {
-                    // Limpiamos el valor de la columna F (índice 5) de $, comas y espacios
-                    let montoLimpio = columnas[5].replace(/[$\s,]/g, '');
-                    
+                const columnas = fila.split(',');
+                if (columnas.length >= 6 && columnas[0].trim() !== "") {
                     distritosArray.push({
-                        nombre: columnas[0].replace(/"/g, '').trim(), // Columna A
-                        aportacion: parseFloat(montoLimpio) || 0,     // Columna F
+                        nombre: columnas[0].replace(/"/g, '').trim(),
+                        anual: parseFloat(columnas[1]) || 0,
+                        polio: parseFloat(columnas[2]) || 0,
+                        dotacion: parseFloat(columnas[3]) || 0,
+                        otros: parseFloat(columnas[4]) || 0,
+                        total: parseFloat(columnas[5]) || 0,
                         meta: 100000
                     });
                 }
             });
 
-            // Ordenar de mayor a menor aportación
-            distritosArray.sort((a, b) => b.aportacion - a.aportacion);
+            // Ordenar por Total Aportado
+            distritosArray.sort((a, b) => b.total - a.total);
 
             let htmlContenido = "";
             distritosArray.forEach((d, index) => {
-                const porcentaje = Math.min((d.aportacion / d.meta) * 100, 100).toFixed(1);
+                const porcentaje = ((d.total / d.meta) * 100).toFixed(1);
+                const anchoBarra = Math.min(porcentaje, 100);
                 const clasePodio = index < 3 ? 'podio' : '';
+                
+                // Color de la barra: Dorado si supera el 100%, si no Azul/Oro
+                const estiloBarra = porcentaje >= 100 
+                    ? "background: #F7A81B;" 
+                    : "background: linear-gradient(90deg, #013E7F 0%, #F7A81B 100%);";
 
                 htmlContenido += `
-                    <div class="distrito-item ${clasePodio}">
-                        <div class="info-meta">
-                            <span>${index + 1}. Distrito ${d.nombre}</span>
-                            <span>$${d.aportacion.toLocaleString('en-US', {minimumFractionDigits: 2})} USD</span>
-                        </div>
-                        <div class="barra-fondo">
-                            <div class="barra-progreso" style="width: ${porcentaje}%">
-                                ${porcentaje}%
+                    <div class="distrito-item ${clasePodio}" style="margin-bottom: 20px; padding: 15px; background: #fdfdfd; border-radius: 10px; border-left: 5px solid #013E7F; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                        <details style="cursor: pointer;">
+                            <summary style="list-style: none; outline: none;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <span style="font-weight: bold; color: #013E7F;">
+                                        <span style="font-size: 1.2em; margin-right: 5px;">▸</span>
+                                        ${index + 1}. Distrito ${d.nombre}
+                                    </span>
+                                    <span style="font-weight: bold;">$${d.total.toLocaleString('en-US', {minimumFractionDigits: 2})} USD</span>
+                                </div>
+                                <div class="barra-fondo" style="background: #e0e0e0; height: 25px; border-radius: 15px; overflow: hidden; position: relative;">
+                                    <div class="barra-progreso" style="width: ${anchoBarra}%; ${estiloBarra} height: 100%; transition: width 1.5s; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-size: 12px; font-weight: bold;">
+                                        ${porcentaje}%
+                                    </div>
+                                </div>
+                            </summary>
+
+                            <div style="margin-top: 15px; padding: 15px; background: #f1f4f7; border-radius: 8px; font-size: 0.9em; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div><b style="color: #013E7F;">■</b> Fondo Anual: <b>$${d.anual.toLocaleString()}</b></div>
+                                <div><b style="color: #E11B22;">■</b> PolioPlus: <b>$${d.polio.toLocaleString()}</b></div>
+                                <div><b style="color: #169B62;">■</b> Dotación: <b>$${d.dotacion.toLocaleString()}</b></div>
+                                <div><b style="color: #6d20ab;">■</b> Otros Fondos: <b>$${d.otros.toLocaleString()}</b></div>
                             </div>
-                        </div>
+                        </details>
                     </div>
                 `;
             });
 
             document.getElementById('lista-distritos').innerHTML = htmlContenido;
         } catch (error) {
-            console.error("Error:", error);
-            document.getElementById('lista-distritos').innerHTML = "<p>Error al conectar con los datos de la hoja de cálculo.</p>";
+            console.error("Error cargando el ranking:", error);
         }
     }
-
     obtenerDatos();
 </script>
+
+<style>
+    /* Ocultar el triángulo nativo del summary para poner el nuestro */
+    summary::-webkit-details-marker { display: none; }
+    
+    details[open] summary span:first-child span {
+        transform: rotate(90deg);
+        display: inline-block;
+        transition: 0.3s;
+    }
+</style>
+
 </body>
 </html>
