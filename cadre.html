@@ -32,6 +32,33 @@
         .btn-email { color: #17458f; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 5px; }
         .btn-email:hover { text-decoration: underline; }
         .flag-icon { margin-right: 5px; border-radius: 2px; }
+		
+		/* Forzamos a que la columna de nombres sea más ancha */
+#tablaCadre th:first-child, 
+#tablaCadre td:first-child {
+    min-width: 250px; /* Ajusta este número si los nombres son muy largos */
+    white-space: nowrap; /* Evita que el nombre salte de línea */
+}
+
+/* Ajuste para que las celdas de contacto no se peguen */
+#tablaCadre td {
+    padding: 15px 10px;
+    vertical-align: middle;
+}
+		
+/* Forzamos a que la columna de nombres sea más ancha */
+#tablaCadre th:first-child, 
+#tablaCadre td:first-child {
+    min-width: 250px; /* Ajusta este número si los nombres son muy largos */
+    white-space: nowrap; /* Evita que el nombre salte de línea */
+}
+
+/* Ajuste para que las celdas de contacto no se peguen */
+#tablaCadre td {
+    padding: 15px 10px;
+    vertical-align: middle;
+}		
+		
     </style>
 </head>
 <body>
