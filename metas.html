@@ -134,105 +134,128 @@
         </section>
     </main>
 
-    <script>
-        const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSv-x-CV8zYBCvNNmbc455_SSPoWSp6_gbv9H23ovw0OHFXjxvqJ3l270xclcFR3BeXnIXkaRQCosmE/pub?gid=0&single=true&output=csv';
-        let datosDistritos = [];
+<script>
+    const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSv-x-CV8zYBCvNNmbc455_SSPoWSp6_gbv9H23ovw0OHFXjxvqJ3l270xclcFR3BeXnIXkaRQCosmE/pub?gid=0&single=true&output=csv';
+    let datosDistritos = [];
 
-        async function obtenerDatos() {
-            try {
-                const response = await fetch(urlCSV);
-                const data = await response.text();
-                const filas = data.split(/\r?\n/).slice(1); 
-                
-                datosDistritos = filas.map(fila => {
-                    const col = fila.split(',');
-                    return {
-                        nombre: col[0]?.replace(/"/g, '').trim(),
-                        anual: parseFloat(col[1]) || 0,
-                        polio: parseFloat(col[2]) || 0,
-                        dotacion: parseFloat(col[3]) || 0,
-                        otros: parseFloat(col[4]) || 0,
-                        total: parseFloat(col[5]) || 0,
-                        meta: 100000
-                    };
-                }).filter(d => d.nombre);
+    // Función optimizada con todos los distritos de la Región 30
+    function obtenerBandera(nombreDistrito) {
+        const d = nombreDistrito.toString().trim();
+        
+        // Chile
+        if (["4320", "4340", "4355"].includes(d)) return "🇨🇱";
+        // Perú
+        if (["4455", "4465"].includes(d)) return "🇵🇪";
+        // Ecuador
+        if (d === "4400") return "🇪🇨";
+        // Bolivia
+        if (d === "4690") return "🇧🇴";
+        // Argentina y Paraguay
+        if (d === "4845") return "🇦🇷🇵🇾";
+        // Argentina
+        if (["4851", "4895", "4905", "4921"].includes(d)) return "🇦🇷";
+        // Argentina y Uruguay
+        if (d === "4945") return "🇦🇷🇺🇾";
+        // Uruguay
+        if (d === "4975") return "🇺🇾";
+        
+        return "🌐"; // Por si aparece un distrito nuevo o no identificado
+    }
 
-                renderizarRanking('total');
-            } catch (error) {
-                console.error(error);
-                document.getElementById('lista-distritos').innerHTML = "<p>Error al conectar con los datos.</p>";
-            }
+    async function obtenerDatos() {
+        try {
+            const response = await fetch(urlCSV);
+            const data = await response.text();
+            const filas = data.split(/\r?\n/).slice(1); 
+            
+            datosDistritos = filas.map(fila => {
+                const col = fila.split(',');
+                return {
+                    nombre: col[0]?.replace(/"/g, '').trim(),
+                    anual: parseFloat(col[1]) || 0,
+                    polio: parseFloat(col[2]) || 0,
+                    dotacion: parseFloat(col[3]) || 0,
+                    otros: parseFloat(col[4]) || 0,
+                    total: parseFloat(col[5]) || 0,
+                    meta: 100000
+                };
+            }).filter(d => d.nombre);
+
+            renderizarRanking('total');
+        } catch (error) {
+            console.error("Error al cargar datos:", error);
         }
+    }
 
-        function cambiarRanking(criterio, btn) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
-            btn.classList.add('activo');
-            renderizarRanking(criterio);
-        }
+    function cambiarRanking(criterio, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
+        btn.classList.add('activo');
+        renderizarRanking(criterio);
+    }
 
-        function renderizarRanking(criterio) {
-            datosDistritos.sort((a, b) => b[criterio] - a[criterio]);
+    function renderizarRanking(criterio) {
+        datosDistritos.sort((a, b) => b[criterio] - a[criterio]);
 
-            const colores = {
-                total: '#013E7F', anual: '#013E7F', polio: '#E11B22', 
-                dotacion: '#169B62', otros: '#6d20ab'
-            };
+        const colores = {
+            total: '#013E7F', anual: '#013E7F', polio: '#E11B22', 
+            dotacion: '#169B62', otros: '#6d20ab'
+        };
 
-            let htmlContenido = "";
+        let htmlContenido = "";
 
-            datosDistritos.forEach((d, index) => {
-                if (criterio === 'total') {
-                    // VISTA GENERAL (CON METAS, PORCENTAJES Y DESGLOSE)
-                    const porcentaje = ((d.total / d.meta) * 100).toFixed(1);
-                    const anchoBarra = Math.min(porcentaje, 100);
-                    const clasePodio = index < 3 ? 'podio' : '';
-                    let etiquetaExtra = d.total >= d.meta ? '<span style="color: #d48400; font-weight: 800; font-size: 0.85em; margin-left: 10px;">⭐ META SUPERADA</span>' : '';
-                    let colorBarra = d.total >= d.meta ? '#F7A81B' : '#013E7F';
+        datosDistritos.forEach((d, index) => {
+            const bandera = obtenerBandera(d.nombre);
 
-                    htmlContenido += `
-                        <div class="distrito-item ${clasePodio}">
-                            <details>
-                                <summary style="list-style: none; outline: none; cursor: pointer;">
-                                    <div class="info-meta">
-                                        <span style="font-weight: bold; color: #013E7F;">
-                                            <span class="triangulo">▸</span> Distrito ${d.nombre} ${etiquetaExtra}
-                                        </span>
-                                        <span style="font-weight: bold;">$${d.total.toLocaleString('en-US', {minimumFractionDigits: 2})} USD</span>
-                                    </div>
-                                    <div class="barra-fondo">
-                                        <div class="barra-progreso" style="width: ${anchoBarra}%; background: ${colorBarra}">
-                                            ${porcentaje}%
-                                        </div>
-                                    </div>
-                                </summary>
-                                <div class="detalle-grid">
-                                    <div><b style="color: #013E7F;">■</b> Fondo Anual: <br><span style="margin-left:18px;">$${d.anual.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
-                                    <div><b style="color: #E11B22;">■</b> PolioPlus: <br><span style="margin-left:18px;">$${d.polio.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
-                                    <div><b style="color: #169B62;">■</b> Dotación: <br><span style="margin-left:18px;">$${d.dotacion.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
-                                    <div><b style="color: #6d20ab;">■</b> Otros Fondos: <br><span style="margin-left:18px;">$${d.otros.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
+            if (criterio === 'total') {
+                const porcentaje = ((d.total / d.meta) * 100).toFixed(1);
+                const anchoBarra = Math.min(porcentaje, 100);
+                const clasePodio = index < 3 ? 'podio' : '';
+                let etiquetaExtra = d.total >= d.meta ? '<span style="color: #d48400; font-weight: 800; font-size: 0.85em; margin-left: 10px;">⭐ META SUPERADA</span>' : '';
+                let colorBarra = d.total >= d.meta ? '#F7A81B' : '#013E7F';
+
+                htmlContenido += `
+                    <div class="distrito-item ${clasePodio}">
+                        <details>
+                            <summary style="list-style: none; outline: none; cursor: pointer;">
+                                <div class="info-meta">
+                                    <span style="font-weight: bold; color: #013E7F;">
+                                        <span class="triangulo">▸</span> ${bandera} Distrito ${d.nombre} ${etiquetaExtra}
+                                    </span>
+                                    <span style="font-weight: bold;">$${d.total.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
                                 </div>
-                            </details>
-                        </div>
-                    `;
-                } else {
-                    // VISTA DE FONDOS ESPECÍFICOS (SOLO RANKING POR MONTO)
-                    htmlContenido += `
-                        <div class="distrito-item" style="border-left: 5px solid ${colores[criterio]}">
-                            <div class="ranking-simple">
-                                <span>${index + 1}. Distrito ${d.nombre}</span>
-                                <span style="color: ${colores[criterio]}; font-size: 1.1em;">
-                                    $${d[criterio].toLocaleString('en-US', {minimumFractionDigits: 2})} USD
-                                </span>
+                                <div class="barra-fondo">
+                                    <div class="barra-progreso" style="width: ${anchoBarra}%; background: ${colorBarra}">
+                                        ${porcentaje}%
+                                    </div>
+                                </div>
+                            </summary>
+                            <div class="detalle-grid">
+                                <div><b style="color: #013E7F;">■</b> Fondo Anual: <br><span style="margin-left:18px;">$${d.anual.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
+                                <div><b style="color: #E11B22;">■</b> PolioPlus: <br><span style="margin-left:18px;">$${d.polio.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
+                                <div><b style="color: #169B62;">■</b> Dotación: <br><span style="margin-left:18px;">$${d.dotacion.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
+                                <div><b style="color: #6d20ab;">■</b> Otros Fondos: <br><span style="margin-left:18px;">$${d.otros.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
                             </div>
+                        </details>
+                    </div>
+                `;
+            } else {
+                htmlContenido += `
+                    <div class="distrito-item" style="border-left: 5px solid ${colores[criterio]}">
+                        <div class="ranking-simple">
+                            <span>${index + 1}. ${bandera} Distrito ${d.nombre}</span>
+                            <span style="color: ${colores[criterio]}; font-size: 1.1em;">
+                                $${d[criterio].toLocaleString('en-US', {minimumFractionDigits: 2})}
+                            </span>
                         </div>
-                    `;
-                }
-            });
+                    </div>
+                `;
+            }
+        });
 
-            document.getElementById('lista-distritos').innerHTML = htmlContenido;
-        }
+        document.getElementById('lista-distritos').innerHTML = htmlContenido;
+    }
 
-        obtenerDatos();
-    </script>
+    obtenerDatos();
+</script>
 </body>
 </html>
