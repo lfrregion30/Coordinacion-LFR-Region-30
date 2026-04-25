@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metas y Aportaciones - Fundación Rotaria Región 30</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        .ranking-contenedor { margin: 40px 0; }
+        .distrito-item { margin-bottom: 25px; background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 5px solid #013E7F; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .info-meta { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; color: #013E7F; }
+        .barra-fondo { background: #e0e0e0; border-radius: 12px; height: 26px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+        .barra-progreso { 
+            background: linear-gradient(90deg, #013E7F 0%, #F7A81B 100%); 
+            height: 100%; 
+            width: 0%; 
+            transition: width 2s ease-in-out; 
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-end; 
+            padding-right: 15px; 
+            color: white; 
+            font-size: 13px; 
+            font-weight: 800;
+        }
+        .podio { border-left: 5px solid #F7A81B; background: #fffdf5; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="contenedor header-flex">
+            <a href="index.html">
+                <img src="img/logo-coordinacion.png" alt="Logo Rotary Región 30" class="logo">
+            </a>
+        </div>
+    </header>
+
+    <nav>
+        <div class="contenedor">
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="nosotros.html">Nosotros</a></li>
+                <li><a href="subvenciones.html">Subvenciones</a></li>
+                <li><a href="recursos.html">Recursos</a></li>
+                <li><a href="metas.html" class="activo">Metas</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero" style="min-height: 200px; padding: 40px 0;">
+        <div class="hero-content">
+            <h1>Metas de Recaudación</h1>
+            <p>Seguimiento de aportaciones al Fondo Anual - Región 30</p>
+        </div>
+    </section>
+
+    <main class="contenedor">
+        <section class="ranking-contenedor">
+            <h2>Ranking de Distritos</h2>
+            <p>Meta del Periodo: <strong>$100,000 USD</strong> por distrito.</p>
+            
+            <div id="lista-distritos">
+                <p>Consultando datos actualizados...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="contenedor footer-grid">
+            <div class="footer-col">
+                <img src="img/logo-coordinacion.png" alt="Rotary White" class="logo-footer">
+                <p>Coordinación Regional de la Fundación Rotaria, Región 30.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Enlaces Útiles</h4>
+                <ul>
+                    <li><a href="https://brandcenter.rotary.org/es-ES" target="_blank">Brand Center</a></li>
+                    <li><a href="https://www.rotary.org/es/our-causes/ending-polio" target="_blank">PolioPlus</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contacto</h4>
+                <p><strong>Email:</strong> contacto@rotaryregion30.org</p>
+                <p><strong>Ubicación:</strong> Arequipa, Perú</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 La Fundación Rotaria de Rotary International - Región 30.</p>
+        </div>
+    </footer>
+
+<script>
+    const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSv-x-CV8zYBCvNNmbc455_SSPoWSp6_gbv9H23ovw0OHFXjxvqJ3l270xclcFR3BeXnIXkaRQCosmE/pub?gid=0&single=true&output=csv';
+
+    async function obtenerDatos() {
+        try {
+            const response = await fetch(urlCSV);
+            const data = await response.text();
+            const filas = data.split('\n').slice(1); 
+            
+            let distritosArray = [];
+
+            filas.forEach(fila => {
+                // Usamos una expresión regular para separar por comas, 
+                // pero ignorando las comas que estén dentro de comillas (por si acaso)
+                const columnas = fila.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                
+                if (columnas.length >= 7) {
+                    // Limpiamos el valor de la columna F (índice 5) de $, comas y espacios
+                    let montoLimpio = columnas[5].replace(/[$\s,]/g, '');
+                    
+                    distritosArray.push({
+                        nombre: columnas[0].replace(/"/g, '').trim(), // Columna A
+                        aportacion: parseFloat(montoLimpio) || 0,     // Columna F
+                        meta: 100000
+                    });
+                }
+            });
+
+            // Ordenar de mayor a menor aportación
+            distritosArray.sort((a, b) => b.aportacion - a.aportacion);
+
+            let htmlContenido = "";
+            distritosArray.forEach((d, index) => {
+                const porcentaje = Math.min((d.aportacion / d.meta) * 100, 100).toFixed(1);
+                const clasePodio = index < 3 ? 'podio' : '';
+
+                htmlContenido += `
+                    <div class="distrito-item ${clasePodio}">
+                        <div class="info-meta">
+                            <span>${index + 1}. Distrito ${d.nombre}</span>
+                            <span>$${d.aportacion.toLocaleString('en-US', {minimumFractionDigits: 2})} USD</span>
+                        </div>
+                        <div class="barra-fondo">
+                            <div class="barra-progreso" style="width: ${porcentaje}%">
+                                ${porcentaje}%
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('lista-distritos').innerHTML = htmlContenido;
+        } catch (error) {
+            console.error("Error:", error);
+            document.getElementById('lista-distritos').innerHTML = "<p>Error al conectar con los datos de la hoja de cálculo.</p>";
+        }
+    }
+
+    obtenerDatos();
+</script>
+</body>
+</html>
