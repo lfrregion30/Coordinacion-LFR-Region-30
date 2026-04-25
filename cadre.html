@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directorio CADRE - Fundación Rotaria Región 30</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+    
+    <style>
+        /* Estilos específicos para la página CADRE */
+        .buscador-contenedor {
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        .caja-busqueda {
+            max-width: 700px;
+            margin: 20px auto;
+            position: relative;
+        }
+
+        #buscadorCadre {
+            width: 100%;
+            padding: 15px 25px;
+            border-radius: 30px;
+            border: 2px solid #17458f;
+            font-size: 1.1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        #buscadorCadre:focus {
+            border-color: #f7a81b;
+            box-shadow: 0 4px 12px rgba(23, 69, 143, 0.2);
+        }
+
+        .especialidad-tag {
+            background: #eef4fb;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #17458f;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .btn-email {
+            color: #17458f;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-email:hover {
+            text-decoration: underline;
+        }
+
+        /* Ajuste para las banderas en la tabla */
+        .flag-icon {
+            margin-right: 5px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="contenedor header-flex">
+            <a href="index.html">
+                <img src="img/logo-coordinacion.png" alt="Logo Rotary Región 30" class="logo">
+            </a>
+        </div>
+    </header>
+
+    <nav>
+        <div class="contenedor">
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="nosotros.html">Nosotros</a></li>
+                <li><a href="subvenciones.html">Subvenciones</a></li>
+                <li><a href="recursos.html">Recursos</a></li>
+                <li><a href="metas.html">Metas</a></li>
+                <li><a href="cadre.html" class="activo">CADRE</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero" style="min-height: 200px; padding: 40px 0;">
+        <div class="hero-content">
+            <h1>Directorio CADRE</h1>
+            <p>Equipo de Asesores Técnicos de la Fundación Rotaria - Región 30</p>
+        </div>
+    </section>
+
+    <main class="contenedor">
+        <div class="buscador-contenedor">
+            <h2>Encuentra un Especialista</h2>
+            <p>Puedes buscar por nombre, número de distrito o área de interés (Agua, Salud, Educación, etc.)</p>
+            
+            <div class="caja-busqueda">
+                <input type="text" id="buscadorCadre" onkeyup="filtrarCadre()" placeholder="🔍 Escribe para buscar especialistas...">
+            </div>
+        </div>
+
+        <div class="tabla-responsiva">
+            <table id="tablaCadre">
+                <thead>
+                    <tr>
+                        <th>Especialista</th>
+                        <th>País</th>
+                        <th>Distrito</th>
+                        <th>Área de Especialización</th>
+                        <th>Contacto</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    <tr><td colspan="5" style="text-align:center;">Cargando directorio...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer>
+        <div class="contenedor footer-grid">
+            <div class="footer-col">
+                <img src="img/logo-coordinacion.png" alt="Rotary White" class="logo-footer">
+                <p>Coordinación Regional de la Fundación Rotaria, Región 30.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Enlaces Útiles</h4>
+                <ul>
+                    <li><a href="https://brandcenter.rotary.org/es-ES" target="_blank">Brand Center</a></li>
+                    <li><a href="https://www.rotary.org/es/our-causes/ending-polio" target="_blank">PolioPlus</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contacto</h4>
+                <p><strong>Email:</strong> contacto@rotaryregion30.org</p>
+                <p><strong>Ubicación:</strong> Arequipa, Perú</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 La Fundación Rotaria de Rotary International - Región 30.</p>
+        </div>
+    </footer>
+
+    <script>
+        const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSv-x-CV8zYBCvNNmbc455_SSPoWSp6_gbv9H23ovw0OHFXjxvqJ3l270xclcFR3BeXnIXkaRQCosmE/pub?gid=0&single=true&output=csv';
+        let especialistasGlobal = [];
+
+        // Función para banderas (usando tu lista de la Región 30)
+        function obtenerBandera(nombrePais) {
+            const p = nombrePais.toLowerCase().trim();
+            if (p.includes("chile")) return "cl";
+            if (p.includes("peru") || p.includes("perú")) return "pe";
+            if (p.includes("bolivia")) return "bo";
+            if (p.includes("ecuador")) return "ec";
+            if (p.includes("argentina")) return "ar";
+            if (p.includes("paraguay")) return "py";
+            if (p.includes("uruguay")) return "uy";
+            return "";
+        }
+
+        async function cargarDatos() {
+            try {
+                const response = await fetch(urlCSV);
+                const data = await response.text();
+                // Usamos una lógica de separación que respete las comas dentro de comillas
+                const filas = data.split(/\r?\n/).slice(1);
+
+                especialistasGlobal = filas.map(fila => {
+                    const col = fila.split(',');
+                    if (col.length >= 6) {
+                        return {
+                            nombre: col[0].replace(/"/g, '').trim(),
+                            apellidos: col[1].replace(/"/g, '').trim(),
+                            pais: col[2].replace(/"/g, '').trim(),
+                            correo: col[3].replace(/"/g, '').trim(),
+                            distrito: col[4].replace(/"/g, '').trim(),
+                            area: col[5].replace(/"/g, '').trim()
+                        };
+                    }
+                    return null;
+                }).filter(e => e !== null);
+
+                renderizarTabla(especialistasGlobal);
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById('cuerpoTabla').innerHTML = '<tr><td colspan="5">Error al cargar los datos.</td></tr>';
+            }
+        }
+
+        function renderizarTabla(datos) {
+            const tbody = document.getElementById('cuerpoTabla');
+            
+            if (datos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No se encontraron especialistas.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = datos.map(e => {
+                const iso = obtenerBandera(e.pais);
+                const banderaHtml = iso ? `<span class="flag-icon flag-icon-${iso}"></span>` : '🌐';
+                
+                return `
+                    <tr>
+                        <td><strong>${e.nombre} ${e.apellidos}</strong></td>
+                        <td>${banderaHtml} ${e.pais}</td>
+                        <td>Distrito ${e.distrito}</td>
+                        <td><span class="especialidad-tag">${e.area}</span></td>
+                        <td>
+                            <a href="mailto:${e.correo}" class="btn-email">
+                                ✉️ Contactar
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filtrarCadre() {
+            const busqueda = document.getElementById('buscadorCadre').value.toLowerCase();
+            
+            const filtrados = especialistasGlobal.filter(e => 
+                e.nombre.toLowerCase().includes(busqueda) ||
+                e.apellidos.toLowerCase().includes(busqueda) ||
+                e.distrito.toLowerCase().includes(busqueda) ||
+                e.area.toLowerCase().includes(busqueda) ||
+                e.pais.toLowerCase().includes(busqueda)
+            );
+
+            renderizarTabla(filtrados);
+        }
+
+        // Iniciar
+        cargarDatos();
+    </script>
+</body>
+</html>
