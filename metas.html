@@ -8,23 +8,74 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         .ranking-contenedor { margin: 40px 0; }
-        .distrito-item { margin-bottom: 25px; background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 5px solid #013E7F; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .info-meta { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; color: #013E7F; }
-        .barra-fondo { background: #e0e0e0; border-radius: 12px; height: 26px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+        
+        /* Estilos de las Pestañas (Tabs) */
+        .tabs-navegacion {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: 2px solid #013E7F;
+            background: white;
+            color: #013E7F;
+            cursor: pointer;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .tab-btn.activo, .tab-btn:hover {
+            background: #013E7F;
+            color: white;
+        }
+
+        /* Estilos de los ítems del ranking */
+        .distrito-item { 
+            margin-bottom: 20px; 
+            padding: 15px; 
+            background: #fdfdfd; 
+            border-radius: 10px; 
+            border-left: 5px solid #013E7F; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
+        .distrito-item.podio {
+            background: #fffdf5 !important;
+            border-left: 5px solid #F7A81B !important;
+        }
+
+        .info-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .barra-fondo { background: #e0e0e0; border-radius: 15px; height: 26px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
         .barra-progreso { 
-            background: linear-gradient(90deg, #013E7F 0%, #F7A81B 100%); 
             height: 100%; 
-            width: 0%; 
-            transition: width 2s ease-in-out; 
+            transition: width 1.5s ease-in-out; 
             display: flex; 
             align-items: center; 
             justify-content: flex-end; 
             padding-right: 15px; 
             color: white; 
-            font-size: 13px; 
+            font-size: 12px; 
             font-weight: 800;
         }
-        .podio { border-left: 5px solid #F7A81B; background: #fffdf5; }
+
+        /* Triángulo desplegable */
+        summary::-webkit-details-marker { display: none; }
+        details[open] summary .triangulo { transform: rotate(90deg); }
+        .triangulo { display: inline-block; transition: 0.3s; margin-right: 5px; color: #013E7F; }
+        
+        .detalle-grid {
+            margin-top: 15px; 
+            padding: 15px; 
+            background: #f1f4f7; 
+            border-radius: 8px; 
+            font-size: 0.95em; 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            border: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
@@ -52,15 +103,22 @@
     <section class="hero" style="min-height: 200px; padding: 40px 0;">
         <div class="hero-content">
             <h1>Metas de Recaudación</h1>
-            <p>Seguimiento de aportaciones al Fondo Anual - Región 30</p>
+            <p>Monitoreo por Fondos de la Fundación Rotaria - Región 30</p>
         </div>
     </section>
 
     <main class="contenedor">
         <section class="ranking-contenedor">
             <h2>Ranking de Distritos</h2>
-            <p>Meta del Periodo: <strong>$100,000 USD</strong> por distrito.</p>
             
+            <div class="tabs-navegacion">
+                <button class="tab-btn activo" onclick="cambiarRanking('total', this)">General (Total)</button>
+                <button class="tab-btn" onclick="cambiarRanking('anual', this)">Fondo Anual</button>
+                <button class="tab-btn" onclick="cambiarRanking('polio', this)">PolioPlus</button>
+                <button class="tab-btn" onclick="cambiarRanking('dotacion', this)">Dotación</button>
+                <button class="tab-btn" onclick="cambiarRanking('otros', this)">Otros Fondos</button>
+            </div>
+
             <div id="lista-distritos">
                 <p>Consultando datos actualizados...</p>
             </div>
@@ -91,69 +149,86 @@
         </div>
     </footer>
 
-<script>
-    const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSv-x-CV8zYBCvNNmbc455_SSPoWSp6_gbv9H23ovw0OHFXjxvqJ3l270xclcFR3BeXnIXkaRQCosmE/pub?gid=0&single=true&output=csv';
+    <script>
+        const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSv-x-CV8zYBCvNNmbc455_SSPoWSp6_gbv9H23ovw0OHFXjxvqJ3l270xclcFR3BeXnIXkaRQCosmE/pub?gid=0&single=true&output=csv';
+        let datosDistritos = [];
 
-    async function obtenerDatos() {
-        try {
-            const response = await fetch(urlCSV);
-            const data = await response.text();
-            const filas = data.split(/\r?\n/).slice(1); 
-            
-            let distritosArray = [];
-
-            filas.forEach(fila => {
-                const columnas = fila.split(',');
-                if (columnas.length >= 6 && columnas[0].trim() !== "") {
-                    distritosArray.push({
-                        nombre: columnas[0].replace(/"/g, '').trim(),
-                        anual: parseFloat(columnas[1]) || 0,
-                        polio: parseFloat(columnas[2]) || 0,
-                        dotacion: parseFloat(columnas[3]) || 0,
-                        otros: parseFloat(columnas[4]) || 0,
-                        total: parseFloat(columnas[5]) || 0,
+        async function obtenerDatos() {
+            try {
+                const response = await fetch(urlCSV);
+                const data = await response.text();
+                const filas = data.split(/\r?\n/).slice(1); 
+                
+                datosDistritos = filas.map(fila => {
+                    const col = fila.split(',');
+                    return {
+                        nombre: col[0]?.replace(/"/g, '').trim(),
+                        anual: parseFloat(col[1]) || 0,
+                        polio: parseFloat(col[2]) || 0,
+                        dotacion: parseFloat(col[3]) || 0,
+                        otros: parseFloat(col[4]) || 0,
+                        total: parseFloat(col[5]) || 0,
                         meta: 100000
-                    });
-                }
-            });
+                    };
+                }).filter(d => d.nombre);
 
-            // Ordenar por Total Aportado
-            distritosArray.sort((a, b) => b.total - a.total);
+                // Mostrar ranking total por defecto
+                renderizarRanking('total');
+
+            } catch (error) {
+                console.error("Error cargando el ranking:", error);
+                document.getElementById('lista-distritos').innerHTML = "<p>Error al conectar con los datos.</p>";
+            }
+        }
+
+        function cambiarRanking(criterio, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
+            btn.classList.add('activo');
+            renderizarRanking(criterio);
+        }
+
+        function renderizarRanking(criterio) {
+            // Ordenar según el criterio de la pestaña
+            datosDistritos.sort((a, b) => b[criterio] - a[criterio]);
+
+            const colores = {
+                total: '#013E7F', anual: '#013E7F', polio: '#E11B22', 
+                dotacion: '#169B62', otros: '#6d20ab'
+            };
 
             let htmlContenido = "";
-            distritosArray.forEach((d, index) => {
+            datosDistritos.forEach((d, index) => {
                 const porcentaje = ((d.total / d.meta) * 100).toFixed(1);
                 const anchoBarra = Math.min(porcentaje, 100);
-                const clasePodio = index < 3 ? 'podio' : '';
+                const clasePodio = (index < 3 && criterio === 'total') ? 'podio' : '';
                 
-                // Lógica de "Meta Superada"
-                let etiquetaExtra = "";
-                let estiloBarra = "background: linear-gradient(90deg, #013E7F 0%, #F7A81B 100%);";
-
-                if (parseFloat(porcentaje) >= 100) {
-                    estiloBarra = "background: #F7A81B; box-shadow: 0 0 10px rgba(247, 168, 27, 0.4);";
-                    etiquetaExtra = '<span style="color: #d48400; font-weight: 800; font-size: 0.85em; margin-left: 10px;">⭐ META SUPERADA</span>';
-                }
+                let etiquetaExtra = d.total >= d.meta ? '<span style="color: #d48400; font-weight: 800; font-size: 0.85em; margin-left: 10px;">⭐ META SUPERADA</span>' : '';
+                
+                // Color de la barra basado en la pestaña o si superó la meta (solo en vista general)
+                let colorBarra = colores[criterio];
+                if (criterio === 'total' && d.total >= d.meta) colorBarra = '#F7A81B';
 
                 htmlContenido += `
-                    <div class="distrito-item ${clasePodio}" style="margin-bottom: 20px; padding: 15px; background: #fdfdfd; border-radius: 10px; border-left: 5px solid #013E7F; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                        <details style="cursor: pointer;">
-                            <summary style="list-style: none; outline: none;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div class="distrito-item ${clasePodio}">
+                        <details>
+                            <summary style="list-style: none; outline: none; cursor: pointer;">
+                                <div class="info-meta">
                                     <span style="font-weight: bold; color: #013E7F;">
-                                        <span class="triangulo" style="display: inline-block; transition: 0.3s; margin-right: 5px;">▸</span>
+                                        <span class="triangulo">▸</span>
                                         Distrito ${d.nombre} ${etiquetaExtra}
                                     </span>
-                                    <span style="font-weight: bold;">$${d.total.toLocaleString('en-US', {minimumFractionDigits: 2})} USD</span>
+                                    <span style="font-weight: bold; color: ${colores[criterio]}">
+                                        $${d[criterio].toLocaleString('en-US', {minimumFractionDigits: 2})} USD
+                                    </span>
                                 </div>
-                                <div class="barra-fondo" style="background: #e0e0e0; height: 25px; border-radius: 15px; overflow: hidden;">
-                                    <div class="barra-progreso" style="width: ${anchoBarra}%; ${estiloBarra} height: 100%; transition: width 1.5s; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-size: 12px; font-weight: bold;">
+                                <div class="barra-fondo">
+                                    <div class="barra-progreso" style="width: ${anchoBarra}%; background: ${colorBarra}">
                                         ${porcentaje}%
                                     </div>
                                 </div>
                             </summary>
 
-                            <div style="margin-top: 15px; padding: 15px; background: #f1f4f7; border-radius: 8px; font-size: 0.95em; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border: 1px solid #ddd;">
+                            <div class="detalle-grid">
                                 <div><b style="color: #013E7F;">■</b> Fondo Anual: <br><span style="margin-left:18px;">$${d.anual.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
                                 <div><b style="color: #E11B22;">■</b> PolioPlus: <br><span style="margin-left:18px;">$${d.polio.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
                                 <div><b style="color: #169B62;">■</b> Dotación: <br><span style="margin-left:18px;">$${d.dotacion.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
@@ -165,23 +240,9 @@
             });
 
             document.getElementById('lista-distritos').innerHTML = htmlContenido;
-        } catch (error) {
-            console.error("Error cargando el ranking:", error);
         }
-    }
-    obtenerDatos();
-</script>
 
-<style>
-    /* Estilos para que el triángulo rote al abrir */
-    summary::-webkit-details-marker { display: none; }
-    details[open] summary .triangulo {
-        transform: rotate(90deg);
-    }
-    .distrito-item.podio {
-        background: #fffdf5 !important;
-        border-left: 5px solid #F7A81B !important;
-    }
-</style>
+        obtenerDatos();
+    </script>
 </body>
 </html>
