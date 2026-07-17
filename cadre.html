@@ -75,18 +75,27 @@
         </div>
     </header>
 
-    <nav>
-        <div class="contenedor">
-            <ul>
-                <li><a href="index.html">Inicio</a></li>
-                <li><a href="nosotros.html">Nosotros</a></li>
-                <li><a href="subvenciones.html">Subvenciones</a></li>
-                <li><a href="recursos.html">Recursos</a></li>
-                <li><a href="metas.html">Metas</a></li>
-                <li><a href="cadre.html" class="activo">CADRE</a></li>
-            </ul>
-        </div>
-    </nav>
+<nav>
+    <div class="contenedor">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="nosotros.html">Nosotros</a></li>
+            <li><a href="subvenciones.html">Subvenciones</a></li>
+            <li><a href="recursos.html">Recursos</a></li>
+            <!-- Elemento principal con la clase "menu-desplegable" -->
+            <li class="menu-desplegable">
+                <a href="metas.html">Metas <span class="flecha">&#9662;</span></a>
+                <!-- El contenedor ".submenu" que aloja los periodos -->
+                <ul class="submenu">
+                    <li><a href="metas-2024-2025.html">Periodo 2024-2025</a></li>
+                    <li><a href="metas-2025-2026.html">Periodo 2025-2026</a></li>
+                    <li><a href="metas-2026-2027.html">Periodo 2026-2027</a></li>
+                </ul>
+            </li>
+            <li><a href="cadre.html">CADRE</a></li> 
+        </ul>
+    </div>
+</nav>
 
     <section class="hero" style="min-height: 200px; padding: 40px 0;">
         <div class="hero-content">

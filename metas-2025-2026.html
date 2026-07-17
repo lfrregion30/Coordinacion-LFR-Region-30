@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metas 2025-2026 - Fundación Rotaria Región 30</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+    
+    <style>
+        .ranking-contenedor { margin: 40px 0; }
+        
+        /* Pestañas */
+        .tabs-navegacion {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: 2px solid #013E7F;
+            background: white;
+            color: #013E7F;
+            cursor: pointer;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .tab-btn.activo, .tab-btn:hover {
+            background: #013E7F;
+            color: white;
+        }
+
+        /* Ítems del ranking */
+        .distrito-item { 
+            margin-bottom: 15px; 
+            padding: 15px; 
+            background: #fdfdfd; 
+            border-radius: 10px; 
+            border-left: 5px solid #013E7F; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
+        .distrito-item.podio {
+            background: #fffdf5 !important;
+            border-left: 5px solid #F7A81B !important;
+        }
+
+        .info-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        
+        /* Estilos de barra solo para General */
+        .barra-fondo { background: #e0e0e0; border-radius: 15px; height: 26px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+        .barra-progreso { 
+            height: 100%; 
+            transition: width 1s ease-in-out; 
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-end; 
+            padding-right: 15px; 
+            color: white; 
+            font-size: 12px; 
+            font-weight: 800;
+        }
+
+        /* Triángulo y detalles (Solo General) */
+        summary::-webkit-details-marker { display: none; }
+        details[open] summary .triangulo { transform: rotate(90deg); }
+        .triangulo { display: inline-block; transition: 0.3s; margin-right: 5px; color: #013E7F; }
+        
+        .detalle-grid {
+            margin-top: 15px; 
+            padding: 15px; 
+            background: #f1f4f7; 
+            border-radius: 8px; 
+            font-size: 0.95em; 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            border: 1px solid #ddd;
+        }
+
+        /* Estilo simple para rankings de fondos */
+        .ranking-simple {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Estilo para las banderas */
+        .flag-icon {
+            margin-right: 8px;
+            border-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="contenedor header-flex">
+            <a href="index.html">
+                <img src="img/logo-coordinacion.png" alt="Logo Rotary Región 30" class="logo">
+            </a>
+        </div>
+    </header>
+
+<nav>
+    <div class="contenedor">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="nosotros.html">Nosotros</a></li>
+            <li><a href="subvenciones.html">Subvenciones</a></li>
+            <li><a href="recursos.html">Recursos</a></li>
+            <li class="menu-desplegable">
+                <a href="metas.html" class="activo">Metas <span class="flecha">&#9662;</span></a>
+                <ul class="submenu">
+                    <li><a href="metas-2024-2025.html">Periodo 2024-2025</a></li>
+                    <li><a href="metas-2025-2026.html">Periodo 2025-2026</a></li>
+                    <li><a href="metas-2026-2027.html">Periodo 2026-2027</a></li>
+                </ul>
+            </li>
+            <li><a href="cadre.html">CADRE</a></li> 
+        </ul>
+    </div>
+</nav>
+
+    <section class="hero" style="min-height: 200px; padding: 40px 0;">
+        <div class="hero-content">
+            <h1>Metas de Recaudación 2025-2026</h1>
+            <p>Análisis de aportaciones por fondos - Región 30</p>
+        </div>
+    </section>
+
+    <main class="contenedor">
+        <section class="ranking-contenedor">
+            <div class="tabs-navegacion">
+                <button class="tab-btn activo" onclick="cambiarRanking('total', this)">General (Metas)</button>
+                <button class="tab-btn" onclick="cambiarRanking('anual', this)">Fondo Anual</button>
+                <button class="tab-btn" onclick="cambiarRanking('polio', this)">PolioPlus</button>
+                <button class="tab-btn" onclick="cambiarRanking('dotacion', this)">Dotación</button>
+                <button class="tab-btn" onclick="cambiarRanking('otros', this)">Otros Fondos</button>
+            </div>
+
+            <div id="lista-distritos">
+                <p>Consultando datos actualizados...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="contenedor footer-grid">
+            <div class="footer-col">
+                <img src="img/logo-coordinacion.png" alt="Rotary White" class="logo-footer">
+                <p>Coordinación Regional de la Fundación Rotaria, Región 30.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Enlaces Útiles</h4>
+                <ul>
+                    <li><a href="https://brandcenter.rotary.org/es-ES" target="_blank">Brand Center</a></li>
+                    <li><a href="https://www.rotary.org/es/our-causes/ending-polio" target="_blank">PolioPlus</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contacto</h4>
+                <p><strong>Email:</strong> contacto@rotaryregion30.org</p>
+                <p><strong>Ubicación:</strong> Arequipa, Perú</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 La Fundación Rotaria de Rotary International - Región 30.</p>
+        </div>
+    </footer>
+
+<script>
+    // URL configurada para leer los datos del periodo 2025-2026 (gid=122421523)
+    const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSv-x-CV8zYBCvNNmbc455_SSPoWSp6_gbv9H23ovw0OHFXjxvqJ3l270xclcFR3BeXnIXkaRQCosmE/pub?gid=0&single=true&output=csv';
+    let datosDistritos = [];
+
+    function obtenerBandera(nombreDistrito) {
+        const d = nombreDistrito.toString().trim();
+        let iso = "";
+
+        if (["4320", "4340", "4355"].includes(d)) iso = "cl"; 
+        else if (["4455", "4465"].includes(d)) iso = "pe"; 
+        else if (d === "4400") iso = "ec"; 
+        else if (d === "4690") iso = "bo"; 
+        else if (d === "4845") return '<span class="flag-icon flag-icon-ar"></span><span class="flag-icon flag-icon-py"></span>'; 
+        else if (["4851", "4895", "4905", "4921"].includes(d)) iso = "ar"; 
+        else if (d === "4945") return '<span class="flag-icon flag-icon-ar"></span><span class="flag-icon flag-icon-uy"></span>'; 
+        else if (d === "4975") iso = "uy"; 
+        else return "🌐";
+
+        return `<span class="flag-icon flag-icon-${iso}"></span>`;
+    }
+
+    async function obtenerDatos() {
+        try {
+            const response = await fetch(urlCSV);
+            const data = await response.text();
+            const filas = data.split(/\r?\n/).slice(1); 
+            
+            datosDistritos = filas.map(fila => {
+                const col = fila.split(',');
+                return {
+                    nombre: col[0]?.replace(/"/g, '').trim(),
+                    anual: parseFloat(col[1]) || 0,
+                    polio: parseFloat(col[2]) || 0,
+                    dotacion: parseFloat(col[3]) || 0,
+                    otros: parseFloat(col[4]) || 0,
+                    total: parseFloat(col[5]) || 0,
+                    meta: 100000
+                };
+            }).filter(d => d.nombre);
+
+            renderizarRanking('total');
+        } catch (error) {
+            console.error("Error al cargar datos:", error);
+        }
+    }
+
+    function cambiarRanking(criterio, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
+        btn.classList.add('activo');
+        renderizarRanking(criterio);
+    }
+
+    function renderizarRanking(criterio) {
+        datosDistritos.sort((a, b) => b[criterio] - a[criterio]);
+
+        const colores = {
+            total: '#013E7F', anual: '#013E7F', polio: '#E11B22', 
+            dotacion: '#169B62', otros: '#6d20ab'
+        };
+
+        let htmlContenido = "";
+
+        datosDistritos.forEach((d, index) => {
+            const bandera = obtenerBandera(d.nombre);
+
+            if (criterio === 'total') {
+                const porcentaje = ((d.total / d.meta) * 100).toFixed(1);
+                const anchoBarra = Math.min(porcentaje, 100);
+                const clasePodio = index < 3 ? 'podio' : '';
+                let etiquetaExtra = d.total >= d.meta ? '<span style="color: #d48400; font-weight: 800; font-size: 0.85em; margin-left: 10px;">⭐ META SUPERADA</span>' : '';
+                let colorBarra = d.total >= d.meta ? '#F7A81B' : '#013E7F';
+
+                htmlContenido += `
+                    <div class="distrito-item ${clasePodio}">
+                        <details>
+                            <summary style="list-style: none; outline: none; cursor: pointer;">
+                                <div class="info-meta">
+                                    <span style="font-weight: bold; color: #013E7F;">
+                                        <span class="triangulo">▸</span> ${bandera} Distrito ${d.nombre} ${etiquetaExtra}
+                                    </span>
+                                    <span style="font-weight: bold;">$${d.total.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                                </div>
+                                <div class="barra-fondo">
+                                    <div class="barra-progreso" style="width: ${anchoBarra}%; background: ${colorBarra}">
+                                        ${porcentaje}%
+                                    </div>
+                                </div>
+                            </summary>
+                            <div class="detalle-grid">
+                                <div><b style="color: #013E7F;">■</b> Fondo Anual: <br><span style="margin-left:18px;">$${d.anual.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
+                                <div><b style="color: #E11B22;">■</b> PolioPlus: <br><span style="margin-left:18px;">$${d.polio.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
+                                <div><b style="color: #169B62;">■</b> Dotación: <br><span style="margin-left:18px;">$${d.dotacion.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
+                                <div><b style="color: #6d20ab;">■</b> Otros Fondos: <br><span style="margin-left:18px;">$${d.otros.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
+                            </div>
+                        </details>
+                    </div>
+                `;
+            } else {
+                htmlContenido += `
+                    <div class="distrito-item" style="border-left: 5px solid ${colores[criterio]}">
+                        <div class="ranking-simple">
+                            <span>${index + 1}. ${bandera} Distrito ${d.nombre}</span>
+                            <span style="color: ${colores[criterio]}; font-size: 1.1em;">
+                                $${d[criterio].toLocaleString('en-US', {minimumFractionDigits: 2})}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        document.getElementById('lista-distritos').innerHTML = htmlContenido;
+    }
+
+    obtenerDatos();
+</script>
+</body>
+</html>
